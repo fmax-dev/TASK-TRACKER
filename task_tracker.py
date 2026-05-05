@@ -24,20 +24,22 @@ def load_tasks():
 def save_tasks(data):
     """Save tasks to JSON file"""
     with open(TASKS_FILE, 'w') as file:
-        return json.dump(data, file, indent=4)
+        json.dump(data, file, indent=4)
         
 
 def add_task(description):
     """Add tasks to file"""
+    if not description.strip():
+        print("\n❌ Error: Task description cannot be empty")
+        return
+
     data = load_tasks()
 
-    # GENERATING TASK ID
     data["last_id"] += 1
     task_id = data["last_id"]
 
     timestamp = datetime.now().isoformat()
 
-    # CREATING TASK FIELD
     data["tasks"].append(
         {
             "id": task_id,
@@ -47,7 +49,7 @@ def add_task(description):
             "updatedAt": timestamp
         }
     )
-    
+
     save_tasks(data)
     print(f"\n✅ Task successfully added. \nTask ID : {task_id} \nDescription : '{description}' \nStatus : to-do")
 
@@ -65,7 +67,7 @@ def main():
     add_parser = subparsers.add_parser('add', help='Add new task')
     add_parser.add_argument('description', type=str, help='Task description')
 
-
+    # ROUTING LOGIC
     args = parser.parse_args()
     if args.command == 'add':
         add_task(args.description)
