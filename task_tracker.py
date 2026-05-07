@@ -25,6 +25,10 @@ def save_tasks(data):
     """Save tasks to JSON file"""
     with open(TASKS_FILE, 'w') as file:
         json.dump(data, file, indent=4)
+
+
+def current_time():
+    return datetime.now().isoformat()
         
 
 def add_task(description):
@@ -38,7 +42,7 @@ def add_task(description):
     data["last_id"] += 1
     task_id = data["last_id"]
 
-    timestamp = datetime.now().isoformat()
+    timestamp = current_time()
 
     data["tasks"].append(
         {
@@ -54,6 +58,26 @@ def add_task(description):
     print(f"\n✅ Task successfully added. \nTask ID : {task_id} \nDescription : '{description}' \nStatus : to-do")
 
 
+def update_tasks(task_id, new_description):
+    """Update tasks"""
+    if not new_description.strip():
+        print("\n❌ Error: Task description cannot be empty")
+        return
+
+    data = load_tasks()
+
+    for task in data['tasks']:
+        if task['id'] == task_id:
+            task['description'] = new_description
+            task['updatedAt'] = current_time()
+            save_tasks(data)
+            print(f"\n✅ Task successfully updated. \nTask ID : {task_id} \nDescription : {new_description}")
+            return
+    else:
+        print(f"No task found with ID: {task_id}")
+
+
+
 
 def main():
     
@@ -67,10 +91,17 @@ def main():
     add_parser = subparsers.add_parser('add', help='Add new task')
     add_parser.add_argument('description', type=str, help='Task description')
 
+    # UPDATE COMMAND
+    update_parser = subparsers.add_parser('update', help='Update task')
+    update_parser.add_argument('task_id', type=int, help='Task ID')
+    update_parser.add_argument('description', type=str, help='New task description')
+
     # ROUTING LOGIC
     args = parser.parse_args()
     if args.command == 'add':
         add_task(args.description)
+    elif args.command == 'update':
+        update_tasks(args.task_id, args.description)
     else:
         parser.print_help()
 
