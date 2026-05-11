@@ -100,7 +100,7 @@ def delete_tasks(task_id):
         print("\n❌ Task not found.")
 
 
-def task_in_progress(task_id, description, updatedAt):
+def task_in_progress(task_id,):
     """Allow users to mark tasks in progress"""
 
     data = load_tasks()
@@ -112,7 +112,6 @@ def task_in_progress(task_id, description, updatedAt):
     
     for task in data['tasks']:
         if task['id'] == task_id:
-            task['description'] = description
             task['status'] = "mark-in-progress"
             task['updatedAt'] = current_time()
 
@@ -122,6 +121,30 @@ def task_in_progress(task_id, description, updatedAt):
             break
     else:
         print("\n❌ Task not found")
+
+
+def mark_task_done(task_id):
+    """Allow users to mark tasks as done"""
+
+    data = load_tasks()
+
+    # CHECK IF TASKS EMPTY
+    if not data['tasks']:
+        print("\n🔴 Error: The file is empty! Please enter a task first.")
+        return
+    
+    for task in data['tasks']:
+        if task['id'] == task_id:
+            task['status'] = "done"
+            task['updatedAt'] = current_time()
+
+            save_tasks(data)
+
+            print(f"\n✅ Task successfully updated. \nTask ID: {task_id}")
+            break
+    else:
+        print("\n❌ Task not found")
+
 
 
 def main():
@@ -149,6 +172,10 @@ def main():
     in_progress_parser = subparsers.add_parser('mark-in-progress', help='Mark task in progress')
     in_progress_parser.add_argument('task_id', type=int, help='Task ID')
 
+    # MARK AS DONE COMMAND
+    as_done_parser = subparsers.add_parser('mark-done', help='Mark tasks as done')
+    as_done_parser.add_argument('task_id', type=int, help='Task ID')
+
     # ROUTING LOGIC
     args = parser.parse_args()
     if args.command == 'add':
@@ -159,6 +186,8 @@ def main():
         delete_tasks(args.task_id)
     elif args.command == 'mark-in-progress':
         task_in_progress(args.task_id)
+    elif args.command == 'mark-done':
+        mark_task_done(args.task_id)
     else:
         parser.print_help()
 
