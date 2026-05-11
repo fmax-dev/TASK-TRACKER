@@ -76,6 +76,25 @@ def update_tasks(task_id, new_description):
     else:
         print(f"No task found with ID: {task_id}")
 
+def delete_tasks(task_id):
+    """Allow users to delete tasks."""
+    
+    data = load_tasks()
+    
+    # CHECK IF THE IS EMPTY
+    if not data:
+        print("\n🔴 Error: The file is empty! Please enter a task first.")
+        return
+    
+    for task in data['tasks']:
+        if task['id'] == task_id:
+            data['tasks'].remove(task)
+        
+        save_tasks(data)
+        print(f"\n✅ Task ID: {task_id} successfully deleted")
+    
+    else:
+        print("\n❌ Task not found.")
 
 
 
@@ -96,12 +115,18 @@ def main():
     update_parser.add_argument('task_id', type=int, help='Task ID')
     update_parser.add_argument('description', type=str, help='New task description')
 
+    # DELETE COMMAND
+    delete_parser = subparsers.add_parser('delete', help='Delete task')
+    delete_parser.add_argument('task_id', type=int, help='Task ID')
+
     # ROUTING LOGIC
     args = parser.parse_args()
     if args.command == 'add':
         add_task(args.description)
     elif args.command == 'update':
         update_tasks(args.task_id, args.description)
+    elif args.command == 'delete':
+        delete_tasks(args.task_id)
     else:
         parser.print_help()
 
