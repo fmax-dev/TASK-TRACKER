@@ -8,7 +8,7 @@ from datetime import datetime
 TASKS_FILE = "task-tracker.json"
 
 # AVAILABLE STATUS
-VALID_STATUS = ["to-do", "mark-in-progress", "done"]
+VALID_STATUS = ["to-do", "in-progress", "done"]
 
 # LOAD FILE
 def load_tasks():
@@ -112,7 +112,7 @@ def task_in_progress(task_id,):
     
     for task in data['tasks']:
         if task['id'] == task_id:
-            task['status'] = "mark-in-progress"
+            task['status'] = "in-progress"
             task['updatedAt'] = current_time()
 
             save_tasks(data)
