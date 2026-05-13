@@ -8,7 +8,7 @@ from datetime import datetime
 TASKS_FILE = "task-tracker.json"
 
 # AVAILABLE STATUS
-VALID_STATUS = ["to-do", "in-progress", "done"]
+VALID_STATUS = ["todo", "in-progress", "done"]
 
 # LOAD FILE
 def load_tasks():
@@ -74,9 +74,9 @@ def update_tasks(task_id, new_description):
             save_tasks(data)
             
             print(f"\n✅ Task successfully updated. \nTask ID : {task_id} \nDescription : {new_description}")
-            return
+            break
     else:
-        print(f"No task found with ID: {task_id}")
+        print(f"❌ No task found with ID: {task_id}")
 
 def delete_tasks(task_id):
     """Allow users to delete tasks."""
@@ -97,7 +97,7 @@ def delete_tasks(task_id):
             print(f"\n✅ Task ID: {task_id} successfully deleted")
             break
     else:
-        print("\n❌ Task not found.")
+        print(f"\n❌ No task found with ID: {task_id}")
 
 
 def task_in_progress(task_id,):
@@ -120,7 +120,7 @@ def task_in_progress(task_id,):
             print(f"\n✅ Task successfully updated. \nTask ID: {task_id}")
             break
     else:
-        print("\n❌ Task not found")
+        print(f"\n❌ No task found with ID: {task_id}")
 
 
 def mark_task_done(task_id):
@@ -143,14 +143,58 @@ def mark_task_done(task_id):
             print(f"\n✅ Task successfully updated. \nTask ID: {task_id}")
             break
     else:
-        print("\n❌ Task not found")
+        print(f"\n❌ No task found with ID: {task_id}")
+
+
+def list_all_tasks():
+    """Allow users to list all tasks regardless of their status"""
+
+    data = load_tasks()
+
+    # CHECK IF TASKS EMPTY
+    if not data['tasks']:
+        print("\n🔴 Error: The file is empty! Please enter a task first.")
+        return
+    
+    print("\n========== ALL TASKS ==========\n")
+    for index, task in enumerate(data['tasks'], start=1):
+        print(f"{index}. Description: {task['description']} | ID: {task['id']} | Status: {task['status']}\n")
+    
+
+def list_tasks_by_status(status):
+    """Allow users to list all tasks that are not done."""
+
+    data = load_tasks()
+
+    # CHECK IF TASKS EMPTY
+    if not data['tasks']:
+        print("\n🔴 Error: The file is empty! Please enter a task first.")
+        return
+    
+    # CHECK IF VALID STATUS
+    if status not in VALID_STATUS:
+        print(f"\n🔴 Error: Please enter a valid status. \n{VALID_STATUS}")
+        return
+    
+    # FILTER TASKS BY MATHCING STATUS
+    filtered_tasks = []
+    for task in data['tasks']:
+        if task['status'] == status:
+            filtered_tasks.append(task)
+
+    # CHECK IF ANY TASKS WERE FOUND WITH STATUS
+    if not filtered_tasks:
+        print(f"\n🔴 No tasks found with status: {status}")
+        return
+
+
+    print(f"\n========== TASKS - {status.upper()} ==========\n")
+    for index, task in enumerate(filtered_tasks, start=1):
+        print(f"{index}. Description: {task['description']} | ID: {task['id']} | Status: {task['status']}\n")
 
 
 
 def main():
-    
-    # GREETING
-    print("\n========== WELCOME ==========")
 
     parser = argparse.ArgumentParser(description='Simple Task Tracker CLI')
     subparsers = parser.add_subparsers(dest='command')
@@ -176,18 +220,33 @@ def main():
     as_done_parser = subparsers.add_parser('mark-done', help='Mark tasks as done')
     as_done_parser.add_argument('task_id', type=int, help='Task ID')
 
+    # LIST COMMANDS(HANDLES BOTH CASES)
+    list_parser = subparsers.add_parser('list', help='List tasks')
+    list_parser.add_argument('status', nargs='?', default=None, help='Filter by status (to-do, in-progress, done)')
+    
+
     # ROUTING LOGIC
     args = parser.parse_args()
     if args.command == 'add':
         add_task(args.description)
+    # UPDATE COMMAND
     elif args.command == 'update':
         update_tasks(args.task_id, args.description)
+    # DELETE COMMAND
     elif args.command == 'delete':
         delete_tasks(args.task_id)
+    # MARK IN PROGRESS COMMAND
     elif args.command == 'mark-in-progress':
         task_in_progress(args.task_id)
+    # MARK AS DONE COMMAND
     elif args.command == 'mark-done':
         mark_task_done(args.task_id)
+    # LIST COMMANDS
+    elif args.command == 'list':
+        if args.status:
+            list_tasks_by_status(args.status)
+        else:
+            list_all_tasks()
     else:
         parser.print_help()
 
